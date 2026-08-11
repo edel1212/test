@@ -1,0 +1,18 @@
+# Work Flow name
+name: CI Test
+
+# 실행 trigger
+on:
+  push:
+
+# 생성job
+jobs:
+  # hello로 만듬
+  hello:
+    # 실행 환경
+    runs-on: ubuntu-latest
+
+    # 진행 단계
+    steps:
+      - name: Hello
+        run: echo "Hello GitHub Actions"
