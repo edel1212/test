@@ -3,11 +3,7 @@ name: Feature Branch API CI
 
 # 실행 트리거
 on:
-  push:
-    # push 대상 브렌치 제한 [다른 브렌치가 push 해도 제외함]
-    branches:
-      - main
-  
+
   # 메인 브렌치에 PR이 왔을 경우
   pull_request:
     branches:
