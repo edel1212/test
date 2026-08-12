@@ -3,7 +3,10 @@ name: sample
 
 # 실행 트리거
 on:
-  push:
+  pull_request:
+    branches:
+      - main
+
 
 # 잡
 jobs:

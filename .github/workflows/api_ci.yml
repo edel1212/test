@@ -1,5 +1,5 @@
 # Workflow의 이름
-name: API CI
+name: Feature Branch API CI
 
 # 실행 트리거
 on:
