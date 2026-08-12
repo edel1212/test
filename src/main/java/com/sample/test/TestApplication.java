@@ -3,7 +3,7 @@ package com.sample.test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// test
+// test 22
 @SpringBootApplication
 public class TestApplication {
 
