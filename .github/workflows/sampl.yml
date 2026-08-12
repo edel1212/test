@@ -1,0 +1,17 @@
+# Workflow의 이름
+name: sample
+
+# 실행 트리거
+on:
+  push:
+
+# 잡
+jobs:
+  build:
+    # 잡을 실행할 서버 버전
+    runs-on: ubuntu-latest
+
+    # job 안에서 수행될 것
+    steps:
+      - name: Hi
+        run: echo "hello"
