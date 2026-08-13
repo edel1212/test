@@ -8,6 +8,13 @@ on:
     branches:
       - main
 
+# GitHub가 AWS OIDC 토큰을 발급할 수 있도록 권한 부여
+permissions:
+  # OIDC를 사용 쓰기 권한
+  id-token: write
+  contents: read
+
+
 jobs:
   docker-build:
     runs-on: ubuntu-latest
@@ -16,18 +23,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      # AWS IAM Role Assume
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          role-to-assume: arn:aws:iam::975050095892:role/github-actions-test-api-role
+          aws-region: ap-northeast-2
 
-      - name: Grant execute permission
-        run: chmod +x gradlew
-      
-      # 빌드
-      - name: Build JAR
-        run: ./gradlew build
-
-      - name: Build Docker Image
-        run: docker build -t test-api:latest .
+      # AWS 로그인 확인
+      - name: Check AWS Identity
+        # GitHub Actions가 AWS에서 누구로 인증되어 있는지 확인 하는 명령어
+        run: aws sts get-caller-identity
