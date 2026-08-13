@@ -1,11 +1,14 @@
 # Workflow의 이름
-name: API CI
+name: Feature Branch API CI
 
 # 실행 트리거
 on:
-  push:
 
-# 잡
+  # 메인 브렌치에 PR이 왔을 경우
+  pull_request:
+    branches:
+      - main
+
 jobs:
   build:
     # 잡을 실행할 서버 버전
