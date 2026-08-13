@@ -23,10 +23,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Print GitHub IDs
-        run: |
-          echo "OWNER_ID=${{ github.repository_owner_id }}"
-          echo "REPO_ID=${{ github.repository_id }}"
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Build JAR
+        run: ./gradlew build
 
       # AWS IAM Role Assume
       - name: Configure AWS Credentials
@@ -35,7 +42,18 @@ jobs:
           role-to-assume: arn:aws:iam::975050095892:role/github-actions-test-api-role
           aws-region: ap-northeast-2
 
-      # AWS 로그인 확인
-      - name: Check AWS Identity
-        # GitHub Actions가 AWS에서 누구로 인증되어 있는지 확인 하는 명령어
-        run: aws sts get-caller-identity
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: docker build -t test-api:latest .
+
+      - name: Tag Docker Image
+        run: |
+          docker tag test-api:latest \
+            975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:latest
+
+      - name: Push Docker Image
+        run: |
+          docker push \
+            975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:latest
