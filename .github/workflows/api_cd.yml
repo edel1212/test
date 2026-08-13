@@ -1,0 +1,18 @@
+# Workflow의 이름
+name: API CD
+
+# 실행 트리거
+on:
+  # main에 push 될 경우 실행 (PR 후 머지되면서 push 됨)
+  push:
+    branches:
+      - main
+
+jobs:
+  api_deploy:
+    # 잡을 실행할 서버 버전
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Depoly Test
+        run: echo "CD Start"
