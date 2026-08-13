@@ -9,10 +9,25 @@ on:
       - main
 
 jobs:
-  api_deploy:
-    # 잡을 실행할 서버 버전
+  docker-build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Depoly Test
-        run: echo "CD Start"
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+      
+      # 빌드
+      - name: Build JAR
+        run: ./gradlew build
+
+      - name: Build Docker Image
+        run: docker build -t test-api:latest .
