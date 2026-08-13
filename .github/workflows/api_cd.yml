@@ -46,14 +46,12 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker Image
-        run: docker build -t test-api:latest .
-
-      - name: Tag Docker Image
         run: |
-          docker tag test-api:latest \
-            975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:latest
+          docker build \
+            -t 975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }} \
+            .
 
       - name: Push Docker Image
         run: |
           docker push \
-            975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:latest
+            975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }}
