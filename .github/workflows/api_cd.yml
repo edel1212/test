@@ -51,7 +51,17 @@ jobs:
             -t 975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }} \
             .
 
+      # ECR 이미지 푸시
       - name: Push Docker Image
         run: |
           docker push \
             975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }}
+
+      # ESC Task Image 주소 변경
+      - name: Render Amazon ECS Task Definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: test-api
+          image: 975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }}
