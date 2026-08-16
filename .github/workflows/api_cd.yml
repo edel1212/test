@@ -1,0 +1,57 @@
+# Workflow의 이름
+name: API CD
+
+# 실행 트리거
+on:
+  # main에 push 될 경우 실행 (PR 후 머지되면서 push 됨)
+  push:
+    branches:
+      - main
+
+# GitHub가 AWS OIDC 토큰을 발급할 수 있도록 권한 부여
+permissions:
+  # OIDC를 사용 쓰기 권한
+  id-token: write
+  contents: read
+
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Build JAR
+        run: ./gradlew build
+
+      # AWS IAM Role Assume
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::975050095892:role/github-actions-test-api-role
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t 975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }} \
+            .
+
+      - name: Push Docker Image
+        run: |
+          docker push \
+            975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }}
