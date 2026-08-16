@@ -65,3 +65,12 @@ jobs:
           task-definition: task-definition.json
           container-name: test-api
           image: 975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }}
+
+      # 변경된 이미지로 배포 진행
+      - name: Deploy Amazon ECS Task Definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: test-api-service
+          cluster: test-api-cluster
+          wait-for-service-stability: true
