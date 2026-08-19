@@ -49,17 +49,20 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker Image
-        run: |
-          docker build \
-            -t 975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }} \
-            .
+      # Docker Buildx 설치
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # ECR 이미지 푸시
-      - name: Push Docker Image
-        run: |
-          docker push \
+      # build 와 Push를 한번에 진행
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
             975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # ESC Task Image 주소 변경
       - name: Render Amazon ECS Task Definition
