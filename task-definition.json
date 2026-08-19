@@ -12,6 +12,18 @@
       "name": "test-api",
       "image": "975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:latest",
       "essential": true,
+
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8080/actuator/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      },
+
       "portMappings": [
         {
           "containerPort": 8080,
