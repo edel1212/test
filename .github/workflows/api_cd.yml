@@ -8,6 +8,12 @@ on:
     branches:
       - main
 
+# 배포를 하나의 그룹으로 묶어 직렬화 시킴
+concurrency:
+  group: test-api-production
+  # 진행되는 배포가 있을 때 새로운 배포가 추가되면 진행중인 배포 중단 최신으로 진행
+  cancel-in-progress: true
+
 # GitHub가 AWS OIDC 토큰을 발급할 수 있도록 권한 부여
 permissions:
   # OIDC를 사용 쓰기 권한
