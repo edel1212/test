@@ -23,6 +23,8 @@ permissions:
 
 jobs:
   docker-build:
+    # 환경 변수 설정 (Git hub 내 추가 완료)
+    environment: production
     runs-on: ubuntu-latest
 
     steps:
