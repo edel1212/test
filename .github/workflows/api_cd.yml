@@ -1,28 +1,25 @@
-# Workflow의 이름
 name: API CD
 
-# 실행 트리거
 on:
-  # main에 push 될 경우 실행 (PR 후 머지되면서 push 됨)
   push:
     branches:
       - main
 
-# 배포를 하나의 그룹으로 묶어 직렬화 시킴
 concurrency:
   group: test-api-production
-  # 진행되는 배포가 있을 때 새로운 배포가 추가되면 진행중인 배포 중단 최신으로 진행
   cancel-in-progress: true
 
-# GitHub가 AWS OIDC 토큰을 발급할 수 있도록 권한 부여
+# OCID
 permissions:
-  # OIDC를 사용 쓰기 권한
   id-token: write
   contents: read
 
-
 jobs:
-  docker-build:
+
+  # =========================
+  # 1. Build
+  # =========================
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,7 +32,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # 의존성 캐싱
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
@@ -45,21 +41,19 @@ jobs:
       - name: Build JAR
         run: ./gradlew build
 
-      # AWS IAM Role Assume
+      # Build 전용 IAM Role
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: arn:aws:iam::975050095892:role/github-actions-test-api-role
+          role-to-assume: arn:aws:iam::975050095892:role/github-actions-test-api-build-role
           aws-region: ap-northeast-2
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Docker Buildx 설치
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # build 와 Push를 한번에 진행
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
@@ -70,7 +64,29 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ESC Task Image 주소 변경
+
+  # =========================
+  # 2. Production Deploy
+  # =========================
+  deploy:
+    needs: build
+
+    # production 승인 규칙 적용
+    environment: production
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Production 배포 전용 IAM Role
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::975050095892:role/github-actions-test-api-role
+          aws-region: ap-northeast-2
+
       - name: Render Amazon ECS Task Definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -79,7 +95,6 @@ jobs:
           container-name: test-api
           image: 975050095892.dkr.ecr.ap-northeast-2.amazonaws.com/test-api:${{ github.sha }}
 
-      # 변경된 이미지로 배포 진행
       - name: Deploy Amazon ECS Task Definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
