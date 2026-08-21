@@ -11,6 +11,7 @@ concurrency:
 
 # OCID
 permissions:
+  # OIDC를 사용 쓰기 권한 -
   id-token: write
   contents: read
 
